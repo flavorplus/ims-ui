@@ -1,4 +1,9 @@
 # Node.js with Vue
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/dist'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
 # Build a Node.js project that uses Vue.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
@@ -20,7 +25,25 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/dist'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  displayName: 'Copying files'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+  displayName: 'Archiving files'
+
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)'
-  displayName: 'Deploy artifacts'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Publishing files'
